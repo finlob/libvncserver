@@ -152,6 +152,10 @@ ReadFromRFBServer(rfbClient* client, char *out, unsigned int n)
   
       if (i <= 0) {
 	if (i < 0) {
+	  if (errno == EINTR) {
+            continue;
+          }
+
 	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
 	    if (client->readTimeout > 0 &&
 		++retries > (client->readTimeout * 1000 * 1000 / USECS_WAIT_PER_RETRY))
@@ -201,6 +205,9 @@ ReadFromRFBServer(rfbClient* client, char *out, unsigned int n)
 #ifdef WIN32
 	  errno=WSAGetLastError();
 #endif
+	  if (errno == EINTR) {
+            continue;
+          }
 	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
 	    if (client->readTimeout > 0 &&
 		++retries > (client->readTimeout * 1000 * 1000 / USECS_WAIT_PER_RETRY))
